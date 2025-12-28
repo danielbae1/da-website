@@ -155,7 +155,7 @@ const ModernProjectRow = ({ title, category, overview, contributions, results, t
            </div>
         </div>
         <div className="w-full lg:w-1/2">
-           <span className="font-mono text-xs font-bold uppercase tracking-widest text-stone-400 mb-2 block">{category}</span>
+           <span className="font-mono text-xs font-bold uppercase tracking-widest text-green-900 mb-2 block">{category}</span>
            <h2 className="font-serif text-4xl text-stone-900 mb-6 leading-tight">{title}</h2>
            <div className="space-y-8">
              <div>
@@ -801,70 +801,6 @@ export default function PortfolioV3() {
              {/* MODERN PROJECT ROWS - Updated with PDF Content */}
              <ModernProjectRow 
                index={0}
-               title="Formula SAE EV Wheel Centre"
-               category="Automotive / Design"
-               image="https://github.com/danielbae1/portfolio-website-images/blob/main/image_f80de6.jpg?raw=true" 
-               color="bg-stone-900"
-               overview="New wheel centres were required for this year's UTFR car as the team transitioned to in-hub electric motors. This component serves as the critical interface between the hub assembly (motors, gearbox) and the carbon fibre wheel rim."
-               contributions={[
-                 "Designed a mass-optimized wheel centre from scratch.",
-                 "FEA-validated the design with pretensioned M6 bolts and internally modelled hub.",
-                 "Communicated with primary hub designer to ensure perfect interference fit during parallel design phases."
-               ]}
-               results="Reduced mass by 16% compared to baseline geometry. Delivered an FEA-validated part capable of handling all acceleration, braking, and cornering loads."
-               tags={['SolidWorks', 'ANSYS', 'FEA', 'DFM']}
-             />
-
-             <ModernProjectRow 
-               index={1}
-               title="Custom Composites 3D Printer"
-               category="Mechatronics / R&D"
-               image="https://github.com/danielbae1/portfolio-website-images/blob/main/image_98183b.png?raw=true" 
-               color="bg-stone-800"
-               overview="Took over the build and design of a custom 3D printer capable of fibre-reinforced polymer extrusion for a research lab. The goal was to create a flexible platform for testing various polymer pellets."
-               contributions={[
-                 "Designed and FEA-validated a custom mount for the extruder.",
-                 "Selected and assembled motors and 3-axis movement mechanisms.",
-                 "Configured Klipper firmware with no prior experience in firmware programming."
-               ]}
-               results="Delivered an almost-functioning one-of-a-kind 3D printer with moving motors and axes, achieving an 85%+ cost reduction compared to commercial alternatives."
-               tags={['Mechatronics', 'Klipper', 'G-Code', 'Hardware Assembly']}
-             />
-
-             <ModernProjectRow 
-               index={2}
-               title="Cinematography Robot Arm"
-               category="Robotics / Consumer Tech"
-               image="https://github.com/danielbae1/portfolio-website-images/blob/main/image_982399.jpg?raw=true" 
-               color="bg-stone-900"
-               overview="Designed a camera robot aimed at amateur outdoor videographers. The goal was to enable slow, sweeping cinematic shots with a portable system weighing just over 22 kg."
-               contributions={[
-                 "Researched and developed motor and gearbox assembly optimized for minimal noise and backlash.",
-                 "Developed a custom tripod with height adjustability and a spreader for stability.",
-                 "Held frequent design reviews to validate manufacturability."
-               ]}
-               results="Developed all mechanical components including hardware and fasteners. Created an aesthetically beautiful, portable system for automated cinematic shots."
-               tags={['SolidWorks', 'Motor Control', 'Mechanism Design']}
-             />
-
-              <ModernProjectRow 
-               index={3}
-               title="Ford Wind Tunnel CFD Validation"
-               category="Aerodynamics / Testing"
-               image="https://github.com/danielbae1/portfolio-website-images/blob/main/image_98143b.png?raw=true" 
-               color="bg-stone-800"
-               overview="Visited the Ford Performance wind tunnel in Detroit to validate CFD simulation results against real-world data for the UTFR racecar."
-               contributions={[
-                 "Compared CFD simulation results with real-life wind tunnel data.",
-                 "Changed wing element and flap configurations in a fast-paced study.",
-                 "Coordinated team tasks and logistics throughout the testing sessions."
-               ]}
-               results="Drastically reduced flap configuration change times. Increased the number of configurations tested by 50% compared to the previous year."
-               tags={['CFD', 'Aerodynamics', 'Data Analysis']}
-             />
-
-              <ModernProjectRow 
-               index={4}
                title="2-Spool Turbofan Engine"
                category="Propulsion / Additive Mfg"
                image="https://github.com/danielbae1/portfolio-website-images/blob/main/image_980c5a.png?raw=true" 
@@ -876,7 +812,71 @@ export default function PortfolioV3() {
                  "Researching clearances and blade stagger angles to inform geometry."
                ]}
                results="Early CAD models complete for major static and rotating elements. Building foundational turbomachinery knowledge applicable to aerospace roles."
-               tags={['Turbomachinery', 'CAD', 'Additive Mfg']}
+               tags={["Turbomachinery", "CAD", "Additive Mfg"]}
+             />
+
+             <ModernProjectRow 
+               index={1}
+               title="Formula SAE EV Wheel Centre"
+               category="Automotive / Design"
+               image="https://github.com/danielbae1/portfolio-website-images/blob/main/image_f80de6.jpg?raw=true" 
+               color="bg-stone-900"
+               overview="New wheel centres were required for this year's UTFR car as the team transitioned to in-hub electric motors. This component serves as the critical interface between the hub assembly (motors, gearbox) and the carbon fibre wheel rim."
+               contributions={[
+                 "Designed a mass-optimized wheel centre from scratch.",
+                 "FEA-validated the design with pretensioned M6 bolts and internally modelled hub.",
+                 "Communicated with primary hub designer to ensure perfect interference fit during parallel design phases."
+               ]}
+               results="Reduced mass by 16% compared to baseline geometry. Delivered an FEA-validated part capable of handling all acceleration, braking, and cornering loads."
+               tags={["SolidWorks", "ANSYS", "FEA", "DFM"]}
+             />
+
+             <ModernProjectRow 
+               index={2}
+               title="Custom Composites 3D Printer"
+               category="Mechatronics / R&D"
+               image="https://github.com/danielbae1/portfolio-website-images/blob/main/image_98183b.png?raw=true" 
+               color="bg-stone-800"
+               overview="Took over the build and design of a custom 3D printer capable of fibre-reinforced polymer extrusion for a research lab. The goal was to create a flexible platform for testing various polymer pellets."
+               contributions={[
+                 "Designed and FEA-validated a custom mount for the extruder.",
+                 "Selected and assembled motors and 3-axis movement mechanisms.",
+                 "Configured Klipper firmware with no prior experience in firmware programming."
+               ]}
+               results="Delivered an almost-functioning one-of-a-kind 3D printer with moving motors and axes, achieving an 85%+ cost reduction compared to commercial alternatives."
+               tags={["Mechatronics", "Klipper", "G-Code", "Hardware Assembly"]}
+             />
+
+             <ModernProjectRow 
+               index={3}
+               title="Cinematography Robot Arm"
+               category="Robotics / Consumer Tech"
+               image="https://github.com/danielbae1/portfolio-website-images/blob/main/image_982399.jpg?raw=true" 
+               color="bg-stone-900"
+               overview="Designed a camera robot aimed at amateur outdoor videographers. The goal was to enable slow, sweeping cinematic shots with a portable system weighing just over 22 kg."
+               contributions={[
+                 "Researched and developed motor and gearbox assembly optimized for minimal noise and backlash.",
+                 "Developed a custom tripod with height adjustability and a spreader for stability.",
+                 "Held frequent design reviews to validate manufacturability."
+               ]}
+               results="Developed all mechanical components including hardware and fasteners. Created an aesthetically beautiful, portable system for automated cinematic shots."
+               tags={["SolidWorks", "Motor Control", "Mechanism Design"]}
+             />
+
+              <ModernProjectRow 
+               index={4}
+               title="Ford Wind Tunnel CFD Validation"
+               category="Aerodynamics / Testing"
+               image="https://github.com/danielbae1/portfolio-website-images/blob/main/image_98143b.png?raw=true" 
+               color="bg-stone-800"
+               overview="Visited the Ford Performance wind tunnel in Detroit to validate CFD simulation results against real-world data for the UTFR racecar."
+               contributions={[
+                 "Compared CFD simulation results with real-life wind tunnel data.",
+                 "Changed wing element and flap configurations in a fast-paced study.",
+                 "Coordinated team tasks and logistics throughout the testing sessions."
+               ]}
+               results="Drastically reduced flap configuration change times. Increased the number of configurations tested by 50% compared to the previous year."
+               tags={["CFD", "Aerodynamics", "Data Analysis"]}
              />
            </div>
         </div>
