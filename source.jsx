@@ -1,0 +1,987 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Menu, X, ArrowDown, ExternalLink, 
+  MapPin, Calendar, Download, Mail, 
+  Linkedin, ChevronRight, Mountain,
+  Clock, CheckCircle, Zap, Award, FileText,
+  Briefcase, GraduationCap, ArrowLeft, Camera,
+  PenTool, Phone, Settings, Cpu, Wind
+} from 'lucide-react';
+
+/* --- UTILS & CONFIG --- */
+
+// Custom Hook for Scroll Animations
+const FadeIn = ({ children, delay = 0, className = "" }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const domRef = useRef();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) setIsVisible(true);
+      });
+    });
+    if (domRef.current) observer.observe(domRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={domRef}
+      className={`transition-all duration-1000 ease-out transform ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+      } ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+};
+
+/* --- COMPONENTS --- */
+
+const TypewriterText = ({ words, wait = 2000 }) => {
+  const [index, setIndex] = useState(0);
+  const [subIndex, setSubIndex] = useState(0);
+  const [reverse, setReverse] = useState(false);
+  const [blink, setBlink] = useState(true);
+
+  useEffect(() => {
+    const timeout2 = setTimeout(() => {
+      setBlink((prev) => !prev);
+    }, 500);
+    return () => clearTimeout(timeout2);
+  }, [blink]);
+
+  useEffect(() => {
+    if (!words || words.length === 0) return;
+
+    if (subIndex === words[index].length + 1 && !reverse) {
+      const timeout = setTimeout(() => {
+        setReverse(true);
+      }, wait); 
+      return () => clearTimeout(timeout);
+    }
+
+    if (subIndex === 0 && reverse) {
+      setReverse(false);
+      setIndex((prev) => (prev + 1) % words.length);
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setSubIndex((prev) => prev + (reverse ? -1 : 1));
+    }, reverse ? 50 : 100);
+
+    return () => clearTimeout(timeout);
+  }, [subIndex, index, reverse, words, wait]);
+
+  return (
+    <span className="inline-flex whitespace-nowrap">
+      {words[index].substring(0, subIndex)}
+      <span className={`${blink ? 'opacity-100' : 'opacity-0'} transition-opacity duration-100 ml-0.5`}>|</span>
+    </span>
+  );
+};
+
+const NavLink = ({ children, mobile, onClick, active, colorClass }) => (
+  <button 
+    onClick={onClick}
+    className={`
+      uppercase tracking-wider text-xs lg:text-sm font-extrabold transition-all duration-300 whitespace-nowrap
+      ${mobile 
+        ? 'block py-4 text-stone-900 text-lg border-b border-stone-100 w-full text-left' 
+        : `${colorClass} hover:underline decoration-green-700 decoration-2 underline-offset-8 ${active ? 'underline' : ''}`}
+    `}
+  >
+    {children}
+  </button>
+);
+
+const JobEntry = ({ role, company, location, dates, bullets, logoColor = "bg-stone-200", logo, logoSize = "h-16 w-16" }) => (
+  <div className="group relative pl-8 border-l border-stone-200 pb-12 last:pb-0">
+    <div className={`absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full ${logoColor} ring-4 ring-white z-10`}></div>
+    <div className="flex justify-between items-start mb-4">
+      <div className="flex-1 pr-4">
+        <h3 className="font-bold text-stone-900 text-lg leading-tight mb-1">{company}</h3>
+        <div className="flex flex-col gap-1">
+          <div className="text-xs font-mono text-stone-500 uppercase tracking-wider font-bold">{dates}</div>
+          <div className="text-sm text-stone-700 font-bold">{role}</div>
+          {location && <div className="text-sm text-stone-500 font-medium italic">{location}</div>}
+        </div>
+      </div>
+      {logo && (
+        <div className={`${logoSize} flex-shrink-0 flex items-start justify-center ml-4 mt-1`}>
+          <img src={logo} alt={`${company} logo`} className="max-h-full max-w-full object-contain" />
+        </div>
+      )}
+    </div>
+    <ul className="space-y-2">
+      {bullets.map((bullet, i) => (
+        <li key={i} className="text-stone-600 text-sm leading-relaxed pl-4 relative before:content-[''] before:absolute before:left-0 before:top-2 before:w-1 before:h-1 before:bg-stone-300 before:rounded-full">
+          {bullet}
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+
+const ModernProjectRow = ({ title, category, overview, contributions, results, tags, color, image, index }) => {
+  const isEven = index % 2 === 0;
+  
+  return (
+    <FadeIn className="mb-32 last:mb-0">
+      <div className={`flex flex-col lg:flex-row gap-12 lg:gap-20 items-center ${isEven ? '' : 'lg:flex-row-reverse'}`}>
+        <div className="w-full lg:w-1/2">
+           <div className="relative group">
+              <div className={`absolute -inset-4 ${color} opacity-20 rounded-xl transform rotate-2 group-hover:rotate-0 transition-transform duration-500`}></div>
+              <div className="relative h-96 w-full overflow-hidden rounded-lg shadow-2xl">
+                 <div className={`absolute inset-0 ${color} opacity-10 mix-blend-multiply z-10`}></div>
+                 {image ? (
+                    <img src={image} alt={title} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" />
+                 ) : (
+                    <div className="w-full h-full bg-stone-200 flex items-center justify-center text-stone-400 font-mono">Image Placeholder</div>
+                 )}
+                 <div className="absolute bottom-0 left-0 right-0 bg-stone-900/90 backdrop-blur-md p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-20">
+                    <div className="flex flex-wrap gap-2">
+                      {tags.map(tag => (
+                        <span key={tag} className="text-[10px] font-bold uppercase text-stone-300 border border-stone-600 px-2 py-1">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </div>
+        <div className="w-full lg:w-1/2">
+           <span className="font-mono text-xs font-bold uppercase tracking-widest text-stone-400 mb-2 block">{category}</span>
+           <h2 className="font-serif text-4xl text-stone-900 mb-6 leading-tight">{title}</h2>
+           <div className="space-y-8">
+             <div>
+               <h4 className="flex items-center gap-2 font-bold text-stone-800 text-sm uppercase tracking-wide mb-2 border-b border-stone-200 pb-1">
+                 <Settings size={14} className="text-stone-400" /> Overview
+               </h4>
+               <p className="text-stone-600 text-sm leading-relaxed">{overview}</p>
+             </div>
+             <div>
+               <h4 className="flex items-center gap-2 font-bold text-stone-800 text-sm uppercase tracking-wide mb-2 border-b border-stone-200 pb-1">
+                 <Cpu size={14} className="text-stone-400" /> My Contributions
+               </h4>
+               <ul className="space-y-2">
+                 {contributions.map((item, i) => (
+                   <li key={i} className="text-stone-600 text-sm leading-relaxed pl-3 border-l-2 border-stone-200">
+                     {item}
+                   </li>
+                 ))}
+               </ul>
+             </div>
+             {results && (
+               <div>
+                 <h4 className="flex items-center gap-2 font-bold text-stone-800 text-sm uppercase tracking-wide mb-2 border-b border-stone-200 pb-1">
+                   <Award size={14} className="text-stone-400" /> Results
+                 </h4>
+                 <p className="text-stone-600 text-sm leading-relaxed">{results}</p>
+               </div>
+             )}
+           </div>
+        </div>
+      </div>
+    </FadeIn>
+  );
+};
+
+const ExpeditionCard = ({ title, sub, location, image, size = "standard" }) => {
+  let gridClass = "col-span-1 row-span-1 h-80";
+  if (size === "wide") gridClass = "md:col-span-2 h-80";
+  if (size === "tall") gridClass = "row-span-2 h-[42rem]"; 
+
+  return (
+    <div className={`relative group overflow-hidden rounded-sm ${gridClass}`}>
+      {image ? (
+        <img 
+          src={image} 
+          alt={title} 
+          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 grayscale group-hover:grayscale-0" 
+        />
+      ) : (
+        <div className="w-full h-full bg-stone-200 flex items-center justify-center">No Image</div>
+      )}
+      
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-500"></div>
+      
+      <div className="absolute bottom-0 left-0 p-8 w-full transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+        <div className="flex items-center gap-2 text-white/70 text-xs font-mono uppercase tracking-widest mb-2">
+          <MapPin size={12} /> {location}
+        </div>
+        <h3 className="font-serif text-3xl text-white mb-2 leading-none">{title}</h3>
+        <p className="text-white/60 text-sm font-light opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
+          {sub}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+const SkillBar = ({ skill, level }) => {
+  const percentage = Math.min((level / 3) * 100, 100);
+  return (
+    <div className="mb-4">
+      <div className="flex justify-between mb-1">
+        <span className="text-sm font-bold text-stone-700">{skill}</span>
+      </div>
+      <div className="h-1.5 w-full bg-stone-200 rounded-full overflow-hidden relative">
+         <div className="absolute left-1/3 top-0 bottom-0 w-px bg-white z-10"></div>
+         <div className="absolute left-2/3 top-0 bottom-0 w-px bg-white z-10"></div>
+         <div className="h-full bg-green-800 rounded-full transition-all duration-500 ease-out" style={{ width: `${percentage}%` }}></div>
+      </div>
+    </div>
+  );
+};
+
+const SkillCategory = ({ title, skills }) => (
+  <div className="mb-8 break-inside-avoid">
+    <h4 className="font-mono text-sm font-extrabold uppercase tracking-widest text-green-900 mb-4 border-b border-stone-200 pb-2">
+      {title}
+    </h4>
+    <div>
+      {skills.map((s, i) => (
+        <SkillBar key={i} skill={s.name} level={s.level} />
+      ))}
+    </div>
+  </div>
+);
+
+const SummaryModal = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-stone-900/60 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="relative bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in fade-in zoom-in duration-300">
+        <button onClick={onClose} className="absolute top-4 right-4 p-2 hover:bg-stone-100 rounded-full transition-colors">
+          <X size={20} className="text-stone-500" />
+        </button>
+        <div className="p-8 md:p-12">
+          <div className="flex items-center gap-2 mb-6 text-green-700 font-mono text-xs font-bold uppercase tracking-widest">
+            <Clock size={14} /> The 2-Minute Read
+          </div>
+          <h2 className="font-serif text-3xl text-stone-900 mb-2">Danny Bae</h2>
+          <p className="text-stone-500 font-medium mb-8">Mechanical Engineering Student (UofT)</p>
+          <div className="space-y-8">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-stone-50 p-4 border border-stone-100">
+                <span className="block font-bold text-2xl text-stone-900">4th</span>
+                <span className="text-xs text-stone-500 uppercase tracking-wide">Year Engineering</span>
+              </div>
+              <div className="bg-stone-50 p-4 border border-stone-100">
+                <span className="block font-bold text-2xl text-stone-900">14</span>
+                <span className="text-xs text-stone-500 uppercase tracking-wide">Countries Trekked</span>
+              </div>
+            </div>
+            <div>
+              <h3 className="font-bold text-stone-900 mb-3 flex items-center gap-2">
+                <Zap size={16} className="text-amber-500" /> Key Competencies
+              </h3>
+              <p className="text-sm text-stone-600 leading-relaxed mb-3">
+                Specializing in Mechatronics and Solid Mechanics. I bridge the gap between heavy mechanical design (CAD, FEA) and computational logic (Python, C++).
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {['SolidWorks', 'ANSYS', 'Python', 'Arduino', 'Manufacturing'].map(s => (
+                  <span key={s} className="px-2 py-1 bg-stone-100 text-stone-600 text-xs font-bold uppercase">{s}</span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="font-bold text-stone-900 mb-3 flex items-center gap-2">
+                <Award size={16} className="text-green-700" /> Career Highlights
+              </h3>
+              <ul className="space-y-3">
+                <li className="flex gap-3 text-sm text-stone-600">
+                  <CheckCircle size={16} className="text-stone-400 shrink-0 mt-0.5" />
+                  <span><strong>Engineering Leadership:</strong> Oversaw drivetrain integration for UTFR Formula SAE Electric, reducing manufacturing time by 2+ weeks.</span>
+                </li>
+                <li className="flex gap-3 text-sm text-stone-600">
+                  <CheckCircle size={16} className="text-stone-400 shrink-0 mt-0.5" />
+                  <span><strong>R&D & Mechatronics:</strong> Led the design and assembly of a custom fiber-reinforced 3D-printing system, achieving an 85% cost reduction.</span>
+                </li>
+              </ul>
+            </div>
+            <div className="pt-6 border-t border-stone-100 mt-8">
+               <p className="text-sm font-medium text-stone-900 mb-4">
+                 Currently seeking PEY Co-op opportunities for <span className="underline decoration-green-500 decoration-2">Fall 2025</span>.
+               </p>
+               <div className="flex gap-4">
+                 <button onClick={onClose} className="bg-stone-900 text-white px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-stone-700 transition-colors w-full md:w-auto text-center">
+                   View Full Portfolio
+                 </button>
+                 <a href="mailto:danny.bae@mail.utoronto.ca" className="border border-stone-200 text-stone-900 px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-stone-50 transition-colors w-full md:w-auto text-center">
+                   Contact Me
+                 </a>
+               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* --- SKILLS CONFIGURATION --- */
+const SKILLS_DATA = [
+  {
+    title: "Computer Aided Design (CAD)",
+    items: [
+      { name: "SolidWorks", level: 2.2 },
+      { name: "Siemens NX", level: 1.3 },
+      { name: "Catia", level: 1.3 },
+      { name: "Fusion 360", level: 1.7 }
+    ]
+  },
+  {
+    title: "Mechanical Design / Analysis",
+    items: [
+      { name: "ANSYS Mechanical FEA", level: 2.1 },
+      { name: "Siemens STAR-CCM+", level: 1.4 },
+      { name: "DFM & DFA", level: 1.7 },
+      { name: "GD&T Standards", level: 1.8 }
+    ]
+  },
+  {
+    title: "Fabrication / Prototyping",
+    items: [
+      { name: "Machining (Mill/Lathe)", level: 2 },
+      { name: "3D Printing / Additive", level: 1.8 },
+      { name: "Rapid Prototyping", level: 2.2 },
+      { name: "Power & Hand Tools", level: 2.9 }
+    ]
+  },
+  {
+    title: "Documentation / Logistics",
+    items: [
+      { name: "Project Management (Gantt, Excel)", level: 2.4 },
+      { name: "Technical Presentations", level: 1.7}, 
+      { name: "Microsoft Suite", level: 2.8 }   ]
+  },
+  {
+    title: "Programming",
+    items: [
+      { name: "Python", level: 1.9 },
+      { name: "MATLAB", level: 1.5 },
+      { name: "G-Code", level: 1.5 }
+    ]
+  },
+  {
+    title: "Backpacking",
+    items: [
+      { name: "Navigation & Mobility", level: 2.8 },
+      { name: "Cross-Cultural Communication", level: 2.3 },
+      { name: "Hiking & Scrambling", level: 2.7 },
+      { name: "Mountaineering", level: 1.8}
+    ]
+  }
+];
+
+export default function PortfolioV3() {
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [currentView, setCurrentView] = useState('home');
+  const [scrollY, setScrollY] = useState(0); 
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+      setScrollY(window.scrollY); 
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleNavClick = (view, id) => {
+    setCurrentView(view);
+    setMenuOpen(false);
+    setTimeout(() => {
+      if (id) {
+        const element = document.getElementById(id);
+        if (element) element.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 100);
+  };
+
+  // Nav text color - White when at top (scrolled=false) REGARDLESS of page, Dark when scrolled
+  const navTextColor = !scrolled 
+    ? 'text-white drop-shadow-md hover:text-stone-200' 
+    : 'text-stone-500 hover:text-stone-900';
+
+  return (
+    <div className="bg-stone-50 min-h-screen font-sans text-stone-900 selection:bg-green-200 selection:text-green-900">
+      
+      <SummaryModal isOpen={summaryOpen} onClose={() => setSummaryOpen(false)} />
+
+      {/* --- NAVIGATION --- */}
+      <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? 'bg-white/90 backdrop-blur-md py-4 shadow-sm' : 'bg-transparent py-8'}`}>
+        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+          <button 
+            onClick={() => handleNavClick('home', null)}
+            className={`font-serif font-black text-3xl tracking-tight z-50 ${!scrolled || menuOpen ? 'text-white drop-shadow-md' : 'text-stone-900'}`}
+          >
+            D.BAE
+          </button>
+
+          {/* Desktop Links */}
+          <div className="hidden lg:flex gap-8">
+             <NavLink onClick={() => handleNavClick('projects', null)} active={currentView === 'projects'} colorClass={navTextColor}>Engineering Projects</NavLink>
+             <NavLink onClick={() => handleNavClick('home', 'experience')} active={false} colorClass={navTextColor}>Education & Experience</NavLink>
+             <NavLink onClick={() => handleNavClick('home', 'skills')} active={false} colorClass={navTextColor}>Technical Skills</NavLink>
+             <NavLink onClick={() => handleNavClick('outdoors', null)} active={currentView === 'outdoors'} colorClass={navTextColor}>Expeditions & Photography</NavLink>
+          </div>
+
+          {/* Mobile Toggle */}
+          <button onClick={() => setMenuOpen(!menuOpen)} className={`lg:hidden z-50 ${!scrolled || menuOpen ? 'text-white drop-shadow-md' : 'text-stone-900'}`}>
+            {menuOpen ? <X /> : <Menu />}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {menuOpen && (
+          <div className="fixed inset-0 bg-white z-40 flex items-center justify-center animate-in fade-in duration-200">
+            <div className="flex flex-col items-center gap-6 w-full px-12">
+              <NavLink mobile onClick={() => handleNavClick('home', null)}>Home</NavLink>
+              <NavLink mobile onClick={() => handleNavClick('projects', null)}>Engineering Projects</NavLink>
+              <NavLink mobile onClick={() => handleNavClick('home', 'experience')}>Education & Experience</NavLink>
+              <NavLink mobile onClick={() => handleNavClick('home', 'skills')}>Technical Skills</NavLink>
+              <NavLink mobile onClick={() => handleNavClick('outdoors', null)}>Expeditions & Photography</NavLink>
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* ==================== HOME VIEW ==================== */}
+      {currentView === 'home' && (
+        <>
+          {/* --- HERO SECTION --- */}
+          <header className="relative h-screen flex items-center justify-center overflow-hidden">
+            <div className="absolute inset-0 bg-stone-900">
+               {/* Gradients */}
+               <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/60 z-10"></div>
+               {/* Parallax Image Layer */}
+               <div 
+                 className="absolute w-full h-[120vh] -top-[10vh] left-0 bg-cover bg-center opacity-80" 
+                 style={{ 
+                   backgroundImage: `url('https://github.com/danielbae1/portfolio-website-images/blob/main/DSC01603.JPG?raw=true')`,
+                   transform: `translateY(${scrollY * 0.5}px)` 
+                 }}
+               ></div>
+            </div>
+
+            <div className="relative z-20 text-center text-white px-6 w-full max-w-6xl mx-auto">
+              <div className="mb-6 opacity-80 font-mono text-xs md:text-sm tracking-[0.2em] uppercase flex flex-col md:flex-row gap-3 items-center justify-center text-stone-300">
+                <span className="whitespace-nowrap">Mechanical Engineer</span>
+                <span className="hidden md:inline text-stone-500">|</span>
+                <span className="font-bold text-white min-w-min transition-all duration-300">
+                  <TypewriterText 
+                    words={[
+                      "Photographer", 
+                      "Automotive Enthusiast", 
+                      "Backpacker", 
+                      "Aerospace Enthusiast", 
+                      "Trailblazer"
+                    ]} 
+                  />
+                </span>
+                <span className="hidden md:inline text-stone-500">|</span>
+                <span className="whitespace-nowrap">Toronto</span>
+              </div>
+
+              <h1 className="font-serif text-6xl md:text-8xl lg:text-9xl mb-8 tracking-tight text-white drop-shadow-2xl">
+                Danny Bae
+              </h1>
+              <div className="flex flex-col md:flex-row gap-6 justify-center items-center opacity-90 text-stone-200">
+                 <span className="flex items-center gap-2 text-sm font-medium tracking-wide">
+                   <Mail size={16} /> danny.bae@mail.utoronto.ca
+                 </span>
+                 <span className="hidden md:block w-px h-4 bg-white/40"></span>
+                 <span className="flex items-center gap-2 text-sm font-medium tracking-wide">
+                   <Phone size={16} /> 226-921-5604
+                 </span>
+              </div>
+            </div>
+
+            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 text-white/50 animate-bounce">
+              <ArrowDown size={24} />
+            </div>
+          </header>
+
+          {/* --- RECRUITER SUMMARY BAR --- */}
+          <div className="bg-gradient-to-r from-orange-50 to-stone-200 border-b border-stone-200 sticky top-0 md:relative z-30 shadow-md">
+            <div className="max-w-6xl mx-auto px-6 h-20 md:h-24 flex items-center justify-between">
+              
+              <div className="hidden md:flex items-center gap-6 opacity-60 grayscale hover:grayscale-0 transition-all duration-300">
+                <div className="flex items-center gap-2 font-serif font-bold text-stone-700">
+                   <span className="text-2xl">UofT</span>
+                </div>
+                <div className="h-4 w-px bg-stone-400"></div>
+                <div className="font-bold text-stone-600 tracking-tight">UTFR</div>
+              </div>
+
+              <div className="flex-1 md:flex-none flex justify-center">
+                 <button 
+                   onClick={() => setSummaryOpen(true)}
+                   className="bg-stone-900 hover:bg-green-900 text-white px-6 md:px-8 py-3 md:py-4 text-xs font-bold uppercase tracking-widest transition-all duration-300 transform hover:-translate-y-1 shadow-md flex items-center gap-3"
+                 >
+                   <Clock size={16} className="text-stone-400" />
+                   Click Here for 2 Minute Summary
+                 </button>
+              </div>
+
+               <div className="hidden md:flex items-center gap-6 opacity-60 grayscale hover:grayscale-0 transition-all duration-300 justify-end">
+                <div className="font-mono text-xs font-bold text-stone-600 uppercase">
+                  Available <br/> Fall 2025
+                </div>
+                <a href="https://www.linkedin.com/in/danielbae1/" target="_blank" rel="noreferrer" className="h-8 w-8 bg-white rounded-full flex items-center justify-center hover:bg-blue-100 transition-colors shadow-sm">
+                   <Linkedin size={16} className="text-stone-700" />
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* --- ABOUT SECTION --- */}
+          <section id="about" className="relative bg-stone-900 text-white overflow-hidden">
+             {/* Background Image */}
+             <div className="absolute inset-0 z-0">
+                <div className="absolute inset-0 bg-stone-900/80 z-10"></div> {/* Dark Overlay */}
+                <img 
+                  src="https://github.com/danielbae1/portfolio-website-images/blob/main/DSC02135.JPG?raw=true" 
+                  alt="Mountain Background" 
+                  className="w-full h-full object-cover grayscale opacity-60"
+                />
+             </div>
+
+             <div className="max-w-6xl mx-auto px-6 md:px-12 py-32 relative z-10">
+               <div className="grid md:grid-cols-2 gap-16 items-center">
+                 {/* Text Content - Fade In */}
+                 <FadeIn>
+                    <h2 className="font-serif text-5xl md:text-6xl text-white mb-8 leading-tight drop-shadow-lg">
+                      Engineering with <br/> an explorer's mindset.
+                    </h2>
+                    <div className="space-y-6 text-stone-200 leading-relaxed text-sm md:text-base font-sans font-medium tracking-wide drop-shadow-md">
+                       <p>
+                        Hello! My name is <strong>Danny</strong> and I am a <strong>Mechanical Engineering student</strong> raised in rural Stratford, ON, at the <strong>University of Toronto</strong> with specialization in <strong>Mechatronics and Solid Mechanics</strong>. My life has changed drastically within the past three years and here's my story.
+                       </p>
+                       
+                       <p>
+                         Initially pursuing medicine after high school in 2020 and studying at one of Canada's most competitive pre-med programs for two and a half years, I dropped out. After taking some time away to work full time, reflect, and <strong>solo-backpack South America</strong>, I decided to begin my mechanical engineering career at the University of Toronto.
+                       </p>
+  
+                       <p>
+                         I not only reignited my curiosity and passion for mechanical engineering, but I supercharged my drive to pursue three industries: <strong>aerospace, performance automotive, and consumer tech</strong>. From designing jet propulsion systems to the newest and flashy tech, the passion is there. But do I have the skills to back it up?
+                       </p>
+  
+                       <p>
+                         Throughout my time here at U of T, I've gained invaluable technical experience working with <strong>UTFR (University of Toronto Formula Racing)</strong>, a composites research lab, and on my own engineering endeavors at home. My most notable contribution to our FSAE team has been designing wheel centers for our first ever in-hub motor race car, considering novel, unfamiliar load cases the team has never previously dealt with. Outside of school, my largest and most ambitious project has been designing, validating, and 3D printing a high-bypass, 2-spool turbofan engine.
+                       </p>
+  
+                       <p>
+                         These experiences—from the resilience learned during my career pivot to the technical knowledge required for FSAE design and propulsion analysis—have prepared me to take the next step and apply my skills in more fast-paced industrial environments. I'm currently seeking <strong>Summer Co-op opportunities for May 2025</strong>.
+                       </p>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-4 mt-12">
+                      <a href="#" className="flex items-center gap-2 bg-white text-stone-900 px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-stone-200 transition-colors shadow-lg">
+                        <Download size={16} /> Resume
+                      </a>
+                      <a href="#" className="flex items-center gap-2 border-2 border-white text-white px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-white/10 transition-colors">
+                        <FileText size={16} /> Portfolio PDF
+                      </a>
+                    </div>
+                 </FadeIn>
+                 
+                 {/* Profile Images Column */}
+                 <FadeIn delay={200} className="hidden md:flex md:flex-col gap-6">
+                    {/* Main Profile Image */}
+                   <div className="relative aspect-[4/5] w-full overflow-hidden border-8 border-white/10 shadow-2xl rounded-lg">
+                     <img 
+                       src="https://github.com/danielbae1/portfolio-website-images/blob/main/_DSC7038_Original.JPG?raw=true" 
+                       alt="Danny Bae" 
+                       className="w-full h-full object-cover" 
+                     />
+                   </div>
+                   
+                   {/* Secondary Image */}
+                   <div className="relative aspect-square w-2/3 self-end overflow-hidden border-8 border-white/10 shadow-2xl rounded-lg -mt-12 z-10">
+                     <img 
+                       src="https://github.com/danielbae1/portfolio-website-images/blob/main/IMG_7569%20Copy%20Copy.JPG?raw=true" 
+                       alt="Danny Bae - Secondary" 
+                       className="w-full h-full object-cover" 
+                     />
+                   </div>
+                 </FadeIn>
+               </div>
+             </div>
+          </section>
+
+            {/* --- EDUCATION & EXPERIENCE SECTION --- */}
+            <section id="experience" className="mb-32 max-w-6xl mx-auto px-6 md:px-12 pt-24">
+              <div className="flex items-end justify-between border-b border-stone-200 pb-4 mb-12">
+                <h2 className="font-serif text-3xl text-stone-900">Education & Experience</h2>
+                <a href="#" className="text-xs font-bold uppercase tracking-widest text-stone-400 hover:text-stone-900 flex items-center gap-1">
+                  Full History <ChevronRight size={14} />
+                </a>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-16">
+                
+                {/* LEFT COLUMN: Academic & Expeditions */}
+                <div>
+                  <h3 className="font-bold text-stone-900 mb-8 flex items-center gap-2 text-lg uppercase tracking-wider border-b border-stone-100 pb-2">
+                    <GraduationCap size={20} className="text-stone-400" />
+                    Academic & Expeditions
+                  </h3>
+                  
+                  <div className="space-y-2">
+                    <JobEntry 
+                      company="University of Toronto"
+                      role="BASc Mechanical Eng. + Business Minor"
+                      location="Year 4"
+                      dates="Sep 2024 - Present"
+                      logo="https://github.com/danielbae1/portfolio-website-images/blob/main/uoft%20logo.png?raw=true"
+                      logoSize="h-36 w-36" 
+                      bullets={[
+                        "Specialization: Mechatronics & Solid Mechanics.",
+                        "UTFR FSAE: Drivetrain & Aerodynamics.",
+                        "Pursuing Engineering Business Minor (Rotman School of Management)."
+                      ]}
+                    />
+                     
+                     <JobEntry 
+                      company="Personal Development"
+                      role="Independent Expeditions & Upgrading"
+                      location="Global / Remote"
+                      dates="May 2023 - Aug 2024"
+                      logoColor="bg-green-600"
+                      bullets={[
+                        <>Undertook <strong>two solo, month-long expeditions</strong> across the mountains and rainforests of Ecuador and Peru.</>,
+                        <>Overcame personal challenges to cultivate <strong>mental resilience, clarity, and determination</strong>.</>,
+                        <>Self-funded travels and tuition by working full-time as a Pharmacy Assistant (see details →).</>,
+                        <><strong>Requalified</strong> for engineering eligibility by independently re-completing university calculus (A+) and chemistry (A+) while maintaining <strong>40-hour work weeks</strong>.</>
+                      ]}
+                    />
+
+                    <JobEntry 
+                      company="Queen's University"
+                      role="Health Sciences (Honours)"
+                      location="Kingston, ON"
+                      dates="Sep 2020 - Dec 2022"
+                      logo="https://github.com/danielbae1/portfolio-website-images/blob/main/queens%20logo.png?raw=true"
+                      logoSize="h-36 w-36" 
+                      bullets={[
+                        "Achieved 4.0 CGPA.",
+                        "Withdrew halfway through 3rd year."
+                      ]}
+                    />
+                    <JobEntry 
+                      company="Stratford Central S.S."
+                      role="Secondary Diploma"
+                      location="Stratford, ON"
+                      dates="2016 - 2020"
+                      logoColor="bg-red-900"
+                      bullets={[
+                        "Varsity Soccer & Basketball.",
+                        "Symphonic Band & Jazz Band."
+                      ]}
+                    />
+                  </div>
+                </div>
+
+                {/* RIGHT COLUMN: Professional Experience */}
+                <div>
+                  <h3 className="font-bold text-stone-900 mb-8 flex items-center gap-2 text-lg uppercase tracking-wider border-b border-stone-100 pb-2">
+                    <Briefcase size={20} className="text-stone-400" />
+                    Experience
+                  </h3>
+                  
+                  <div className="space-y-2">
+                    <JobEntry 
+                      company="University of Toronto Formula Racing"
+                      role="Senior Drivetrain & Aerodynamics Member"
+                      location="Toronto, ON"
+                      dates="Sep 2024 - Present"
+                      logo="https://github.com/danielbae1/portfolio-website-images/blob/main/utfr%20logo.png?raw=true"
+                      logoSize="h-36 w-36" 
+                      bullets={[
+                        <>Assumed leadership of drivetrain subsystem mid-project cycle, overseeing integration across <strong>3 subsystems</strong> and <strong>reducing manufacturing time by 2+ weeks</strong>.</>,
+                        <>Designed and FEA-validated wheel centers and rear wing elements in <strong>SolidWorks</strong> and <strong>ANSYS</strong> applying <strong>GD&T</strong> and <strong>DFM</strong> principles (11% mass reduction, 8% stiffness increase).</>,
+                        <>Designed molds and fabricated <strong>10+ carbon fiber</strong> wing elements by wet layup and vacuum bagging.</>,
+                        <>Conducted <strong>7 STAR-CCM+ simulations</strong> evaluating geometries of rear wing endplates, increasing ClA by 4%.</>,
+                        "Spearheading efforts to improve open-communication between drivetrain and suspension leads."
+                      ]}
+                    />
+                    <JobEntry 
+                      company="University of Toronto"
+                      role="Undergraduate Mechatronics Research Intern"
+                      location="Multifunctional Composites Lab"
+                      dates="May 2025 - Aug 2025"
+                      logo="https://github.com/danielbae1/portfolio-website-images/blob/main/uoft%20logo.png?raw=true"
+                      logoSize="h-36 w-36" 
+                      bullets={[
+                        <>Took sole ownership of finalizing the design and assembly of a <strong>custom 3D-printing system</strong> for fiber-reinforced polymer extrusion.</>,
+                        <>Selected hardware and electrical components and configured <strong>Klipper firmware</strong> via <strong>G-Code</strong> commands.</>,
+                        <>Achieved an <strong>85%+ overall cost reduction</strong> over commercially available systems.</>,
+                        "Coordinated with supervisor in bi-weekly design reviews to align technical decisions with research goals."
+                      ]}
+                    />
+                    
+                    <JobEntry 
+                      company="Shoppers Drug Mart"
+                      role="Pharmacy Assistant"
+                      location="Stratford, ON"
+                      dates="Jun 2022 - Aug 2024"
+                      logo="https://github.com/danielbae1/portfolio-website-images/blob/main/sdm%20logo.png?raw=true"
+                      logoSize="h-32 w-32" 
+                      bullets={[
+                        <>Compiled data from <strong>9600+ prescriptions</strong> into patient database, improving <strong>data entry efficiency by 100%</strong>.</>,
+                        <><strong>Increased</strong> overall pharmacy efficiency by <strong>40%</strong> by implementing an improved prescription preparation process.</>,
+                        <><strong>Coordinated communication</strong> with medical offices and pharmacists to verify prescription and patient details.</>
+                      ]}
+                    />
+                  </div>
+                </div>
+
+              </div>
+            </section>
+
+            {/* --- TECHNICAL SKILLS SECTION --- */}
+            <section id="skills" className="mb-32 max-w-6xl mx-auto px-6 md:px-12">
+              <div className="flex items-end justify-between border-b border-stone-200 pb-4 mb-12">
+                <h2 className="font-serif text-3xl text-stone-900">Technical Skills</h2>
+                <div className="hidden md:flex gap-8 text-xs font-mono font-bold text-stone-400 uppercase">
+                  <span>Introduced</span>
+                  <span>Proficient</span>
+                  <span>Expert</span>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-4">
+                 {SKILLS_DATA.map((category, index) => (
+                   <SkillCategory 
+                     key={index}
+                     title={category.title}
+                     skills={category.items}
+                   />
+                 ))}
+              </div>
+            </section>
+        </>
+      )}
+
+      {/* ==================== PROJECTS VIEW ==================== */}
+      {currentView === 'projects' && (
+        <div className="min-h-screen bg-stone-50"> {/* LIGHT BACKGROUND */}
+           {/* Header */}
+           <div className="relative h-[60vh] w-full flex items-center justify-center overflow-hidden">
+              <div className="absolute inset-0 bg-stone-900">
+                <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/60 z-10"></div>
+                <img 
+                  src="https://github.com/danielbae1/portfolio-website-images/blob/main/IMG_8234.PNG?raw=true" 
+                  alt="Engineering Projects Background" 
+                  className="w-full h-full object-cover opacity-80"
+                />
+              </div>
+              <div className="relative z-20 text-center text-white px-6">
+                <h1 className="font-serif text-5xl md:text-7xl mb-4 drop-shadow-lg">Engineering Projects</h1>
+                <p className="text-stone-200 text-lg max-w-2xl mx-auto">
+                  Technical work involving Mechatronics, CAD Design, and Rapid Prototyping.
+                </p>
+              </div>
+           </div>
+
+           <div className="max-w-6xl mx-auto px-6 py-24">
+             {/* MODERN PROJECT ROWS - Updated with PDF Content */}
+             <ModernProjectRow 
+               index={0}
+               title="Formula SAE EV Wheel Centre"
+               category="Automotive / Design"
+               image="https://github.com/danielbae1/portfolio-website-images/blob/main/image_f80de6.jpg?raw=true" 
+               color="bg-stone-900"
+               overview="New wheel centres were required for this year's UTFR car as the team transitioned to in-hub electric motors. This component serves as the critical interface between the hub assembly (motors, gearbox) and the carbon fibre wheel rim."
+               contributions={[
+                 "Designed a mass-optimized wheel centre from scratch.",
+                 "FEA-validated the design with pretensioned M6 bolts and internally modelled hub.",
+                 "Communicated with primary hub designer to ensure perfect interference fit during parallel design phases."
+               ]}
+               results="Reduced mass by 16% compared to baseline geometry. Delivered an FEA-validated part capable of handling all acceleration, braking, and cornering loads."
+               tags={['SolidWorks', 'ANSYS', 'FEA', 'DFM']}
+             />
+
+             <ModernProjectRow 
+               index={1}
+               title="Custom Composites 3D Printer"
+               category="Mechatronics / R&D"
+               image="https://github.com/danielbae1/portfolio-website-images/blob/main/image_98183b.png?raw=true" 
+               color="bg-stone-800"
+               overview="Took over the build and design of a custom 3D printer capable of fibre-reinforced polymer extrusion for a research lab. The goal was to create a flexible platform for testing various polymer pellets."
+               contributions={[
+                 "Designed and FEA-validated a custom mount for the extruder.",
+                 "Selected and assembled motors and 3-axis movement mechanisms.",
+                 "Configured Klipper firmware with no prior experience in firmware programming."
+               ]}
+               results="Delivered an almost-functioning one-of-a-kind 3D printer with moving motors and axes, achieving an 85%+ cost reduction compared to commercial alternatives."
+               tags={['Mechatronics', 'Klipper', 'G-Code', 'Hardware Assembly']}
+             />
+
+             <ModernProjectRow 
+               index={2}
+               title="Cinematography Robot Arm"
+               category="Robotics / Consumer Tech"
+               image="https://github.com/danielbae1/portfolio-website-images/blob/main/image_982399.jpg?raw=true" 
+               color="bg-stone-900"
+               overview="Designed a camera robot aimed at amateur outdoor videographers. The goal was to enable slow, sweeping cinematic shots with a portable system weighing just over 22 kg."
+               contributions={[
+                 "Researched and developed motor and gearbox assembly optimized for minimal noise and backlash.",
+                 "Developed a custom tripod with height adjustability and a spreader for stability.",
+                 "Held frequent design reviews to validate manufacturability."
+               ]}
+               results="Developed all mechanical components including hardware and fasteners. Created an aesthetically beautiful, portable system for automated cinematic shots."
+               tags={['SolidWorks', 'Motor Control', 'Mechanism Design']}
+             />
+
+              <ModernProjectRow 
+               index={3}
+               title="Ford Wind Tunnel CFD Validation"
+               category="Aerodynamics / Testing"
+               image="https://github.com/danielbae1/portfolio-website-images/blob/main/image_98143b.png?raw=true" 
+               color="bg-stone-800"
+               overview="Visited the Ford Performance wind tunnel in Detroit to validate CFD simulation results against real-world data for the UTFR racecar."
+               contributions={[
+                 "Compared CFD simulation results with real-life wind tunnel data.",
+                 "Changed wing element and flap configurations in a fast-paced study.",
+                 "Coordinated team tasks and logistics throughout the testing sessions."
+               ]}
+               results="Drastically reduced flap configuration change times. Increased the number of configurations tested by 50% compared to the previous year."
+               tags={['CFD', 'Aerodynamics', 'Data Analysis']}
+             />
+
+              <ModernProjectRow 
+               index={4}
+               title="2-Spool Turbofan Engine"
+               category="Propulsion / Additive Mfg"
+               image="https://github.com/danielbae1/portfolio-website-images/blob/main/image_980c5a.png?raw=true" 
+               color="bg-stone-900"
+               overview="A personal project to model and 3D-print a functioning (electric motor-powered) 2-spool turbofan engine to learn turbomachinery fundamentals."
+               contributions={[
+                 "Started detailed CAD for fan, LPC, HPC, combustor, and turbine stages.",
+                 "Developing simplified shafting/bearing layouts for independent N1/N2 speeds.",
+                 "Researching clearances and blade stagger angles to inform geometry."
+               ]}
+               results="Early CAD models complete for major static and rotating elements. Building foundational turbomachinery knowledge applicable to aerospace roles."
+               tags={['Turbomachinery', 'CAD', 'Additive Mfg']}
+             />
+           </div>
+        </div>
+      )}
+
+      {/* ==================== EXPEDITIONS VIEW ==================== */}
+      {currentView === 'outdoors' && (
+        <div className="min-h-screen bg-stone-50"> {/* LIGHT BACKGROUND */}
+           {/* Header */}
+           <div className="relative h-[60vh] w-full flex items-center justify-center overflow-hidden">
+              <div className="absolute inset-0 bg-stone-900">
+                <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/60 z-10"></div>
+                <img 
+                  src="https://github.com/danielbae1/portfolio-website-images/blob/main/DSC01341.JPG?raw=true" 
+                  alt="Expeditions Background" 
+                  className="w-full h-full object-cover opacity-80"
+                />
+              </div>
+              <div className="relative z-20 text-center text-white px-6">
+                <h1 className="font-serif text-5xl md:text-7xl mb-4 drop-shadow-lg">Expeditions & Photography</h1>
+                <p className="text-stone-200 text-lg max-w-2xl mx-auto">
+                   A masterclass in logistics, risk management, and resilience.
+                </p>
+              </div>
+           </div>
+
+           <div className="max-w-6xl mx-auto px-6 py-24">
+              {/* Stats Bar */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 border-y border-stone-200 py-8 mb-16">
+                 <div>
+                   <strong className="block text-3xl font-serif text-stone-900">14</strong>
+                   <span className="text-xs font-mono text-stone-500 uppercase">Countries</span>
+                 </div>
+                 <div>
+                   <strong className="block text-3xl font-serif text-stone-900">3</strong>
+                   <span className="text-xs font-mono text-stone-500 uppercase">Continents</span>
+                 </div>
+                 <div>
+                   <strong className="block text-3xl font-serif text-stone-900">3,976m</strong>
+                   <span className="text-xs font-mono text-stone-500 uppercase">Max Elevation</span>
+                 </div>
+                 <div>
+                   <strong className="block text-3xl font-serif text-stone-900">1</strong>
+                   <span className="text-xs font-mono text-stone-500 uppercase">Backpack</span>
+                 </div>
+              </div>
+
+              {/* Gallery - Updated with Specific Expeditions - Masonry Style */}
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                 <div className="lg:col-span-2">
+                    <ExpeditionCard 
+                        title="Cotopaxi Volcano"
+                        sub="Ecuador | 5,897m"
+                        location="Andes Mountains"
+                        image="https://placehold.co/1200x800/gray/white?text=Cotopaxi"
+                    />
+                 </div>
+                 
+                 <ExpeditionCard 
+                    title="Quilotoa Loop"
+                    sub="Ecuador | Multi-Day Trek"
+                    location="Andes Mountains"
+                    image="https://placehold.co/600x800/gray/white?text=Quilotoa"
+                 />
+                 
+                 <ExpeditionCard 
+                    title="Parque Nacional Cajas"
+                    sub="Ecuador | High Altitude"
+                    location="Cuenca"
+                    image="https://placehold.co/600x800/gray/white?text=Cajas"
+                 />
+                 
+                 <div className="lg:col-span-2">
+                    <ExpeditionCard 
+                        title="Salkantay Trek"
+                        sub="Peru | To Machu Picchu"
+                        location="Cusco Region"
+                        image="https://placehold.co/1200x800/gray/white?text=Salkantay"
+                    />
+                 </div>
+
+                 <ExpeditionCard 
+                    title="Parque Nacional Huascaran"
+                    sub="Peru | Glacial Lakes"
+                    location="Huaraz"
+                    image="https://placehold.co/600x800/gray/white?text=Huascaran"
+                 />
+              </div>
+
+           </div>
+        </div>
+      )}
+
+      {/* --- FOOTER --- */}
+      <footer className="bg-white py-24 border-t border-stone-200 text-center">
+        <h2 className="font-serif text-2xl text-stone-900 mb-8">Let's build something durable.</h2>
+        <a href="mailto:danny.bae@mail.utoronto.ca" className="inline-block border-b border-stone-900 pb-1 text-sm font-bold uppercase tracking-widest hover:text-stone-600 hover:border-stone-600 transition-colors">
+          danny.bae@mail.utoronto.ca
+        </a>
+        <div className="mt-12 text-stone-400 text-xs font-mono">
+          &copy; 2025 Danny Bae. Built with React.
+        </div>
+      </footer>
+
+    </div>
+  );
+}
+
