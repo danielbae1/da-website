@@ -1011,7 +1011,7 @@ export default function PortfolioV3() {
               <div className="relative z-20 text-center text-white px-6">
                 <h1 className="font-serif text-5xl md:text-7xl mb-4 drop-shadow-lg">Expeditions & Photography</h1>
                 <p className="text-stone-200 text-lg max-w-2xl mx-auto">
-                   A masterclass in logistics, risk management, and resilience.
+                   A lot happens when you realize free will.
                 </p>
               </div>
            </div>
@@ -1020,16 +1020,16 @@ export default function PortfolioV3() {
               {/* Stats Bar */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 border-y border-stone-200 py-8 mb-16">
                  <div>
-                   <strong className="block text-3xl font-serif text-stone-900">14</strong>
-                   <span className="text-xs font-mono text-stone-500 uppercase">Countries</span>
+                   <strong className="block text-3xl font-serif text-stone-900">5150 m</strong>
+                   <span className="text-xs font-mono text-stone-500 uppercase">Max Elevation A.S.L.</span>
                  </div>
                  <div>
-                   <strong className="block text-3xl font-serif text-stone-900">3</strong>
-                   <span className="text-xs font-mono text-stone-500 uppercase">Continents</span>
+                   <strong className="block text-3xl font-serif text-stone-900">15</strong>
+                   <span className="text-xs font-mono text-stone-500 uppercase">Mountains</span>
                  </div>
                  <div>
-                   <strong className="block text-3xl font-serif text-stone-900">3,976m</strong>
-                   <span className="text-xs font-mono text-stone-500 uppercase">Max Elevation</span>
+                   <strong className="block text-3xl font-serif text-stone-900">3914 m</strong>
+                   <span className="text-xs font-mono text-stone-500 uppercase">Max 24h Elevation Change</span>
                  </div>
                  <div>
                    <strong className="block text-3xl font-serif text-stone-900">1</strong>
@@ -1044,7 +1044,7 @@ export default function PortfolioV3() {
                         title="Cotopaxi Volcano"
                         sub="Ecuador | 5,897m"
                         location="Andes Mountains"
-                        image="https://placehold.co/1200x800/gray/white?text=Cotopaxi"
+                        image="https://github.com/danielbae1/portfolio-website-images/blob/main/cotopaxi%201.JPG?raw=true"
                     />
                  </div>
                  
@@ -1052,14 +1052,14 @@ export default function PortfolioV3() {
                     title="Quilotoa Loop"
                     sub="Ecuador | Multi-Day Trek"
                     location="Andes Mountains"
-                    image="https://placehold.co/600x800/gray/white?text=Quilotoa"
+                    image="https://github.com/danielbae1/portfolio-website-images/blob/main/quilotoa%201.JPG?raw=true"
                  />
                  
                  <ExpeditionCard 
                     title="Parque Nacional Cajas"
                     sub="Ecuador | High Altitude"
                     location="Cuenca"
-                    image="https://placehold.co/600x800/gray/white?text=Cajas"
+                    image="https://github.com/danielbae1/portfolio-website-images/blob/main/cajas%201.JPG?raw=true"
                  />
                  
                  <div className="lg:col-span-2">
@@ -1067,7 +1067,7 @@ export default function PortfolioV3() {
                         title="Salkantay Trek"
                         sub="Peru | To Machu Picchu"
                         location="Cusco Region"
-                        image="https://placehold.co/1200x800/gray/white?text=Salkantay"
+                        image="https://github.com/danielbae1/portfolio-website-images/blob/main/salkantay%201.JPG?raw=true"
                     />
                  </div>
 
@@ -1075,7 +1075,7 @@ export default function PortfolioV3() {
                     title="Parque Nacional Huascaran"
                     sub="Peru | Glacial Lakes"
                     location="Huaraz"
-                    image="https://placehold.co/600x800/gray/white?text=Huascaran"
+                    image="https://github.com/danielbae1/portfolio-website-images/blob/main/huaraz%201%20(513).JPG?raw=true"
                  />
               </div>
 
