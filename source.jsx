@@ -5,7 +5,7 @@ import {
   Linkedin, ChevronRight, Mountain,
   Clock, CheckCircle, Zap, Award, FileText,
   Briefcase, GraduationCap, ArrowLeft, Camera,
-  PenTool, Phone, Settings, Cpu, Wind
+  PenTool, Phone, Settings, Cpu, Wind, AlertTriangle
 } from 'lucide-react';
 
 /* --- UTILS & CONFIG --- */
@@ -91,7 +91,7 @@ const NavLink = ({ children, mobile, onClick, active, colorClass }) => (
       uppercase tracking-wider text-xs lg:text-sm font-extrabold transition-all duration-300 whitespace-nowrap
       ${mobile 
         ? 'block py-4 text-stone-900 text-lg border-b border-stone-100 w-full text-left' 
-        : `${colorClass} hover:underline decoration-green-700 decoration-2 underline-offset-8 ${active ? 'underline' : ''}`}
+        : `${colorClass} hover:underline decoration-green-700 decoration-2 underline-offset-8 ${active ? 'underline text-stone-900' : ''}`}
     `}
   >
     {children}
@@ -99,7 +99,7 @@ const NavLink = ({ children, mobile, onClick, active, colorClass }) => (
 );
 
 const JobEntry = ({ role, company, location, dates, bullets, logoColor = "bg-stone-200", logo, logoSize = "h-16 w-16" }) => (
-  <div className="group relative pl-8 border-l border-stone-200 pb-12 last:pb-0">
+  <div className="group relative pl-8 border-l border-stone-200 pb-6 last:pb-0">
     <div className={`absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full ${logoColor} ring-4 ring-white z-10`}></div>
     <div className="flex justify-between items-start mb-4">
       <div className="flex-1 pr-4">
@@ -126,67 +126,154 @@ const JobEntry = ({ role, company, location, dates, bullets, logoColor = "bg-sto
   </div>
 );
 
+// --- PROJECT MODAL ---
+const ProjectModal = ({ isOpen, onClose, data }) => {
+  if (!isOpen || !data) return null;
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-stone-900/60 backdrop-blur-md" onClick={onClose}></div>
+      <div className="relative bg-white w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in fade-in zoom-in duration-300 rounded-sm">
+        <button onClick={onClose} className="absolute top-4 right-4 p-2 hover:bg-stone-100 rounded-full transition-colors z-10">
+          <X size={20} className="text-stone-500" />
+        </button>
+        
+        <div className="p-8 md:p-12">
+          <div className="mb-8 border-b border-stone-100 pb-6">
+             <span className="font-mono text-xs font-bold uppercase tracking-widest text-green-900 mb-2 block">{data.category}</span>
+             <h2 className="font-serif text-3xl md:text-4xl text-stone-900 leading-tight mb-2">{data.title}</h2>
+             {data.title.includes("Turbofan") && (
+                <div className="inline-flex items-center gap-2 bg-amber-50 text-amber-700 px-3 py-1 rounded-sm border border-amber-200 mt-2">
+                  <AlertTriangle size={14} />
+                  <span className="text-xs font-bold uppercase tracking-wide">Early Stage • Updates & Photos Coming Soon</span>
+                </div>
+             )}
+          </div>
+
+          <div className="space-y-8">
+            <div>
+               <h4 className="flex items-center gap-2 font-bold text-stone-800 text-sm uppercase tracking-wide mb-3">
+                 <Settings size={16} className="text-stone-400" /> Overview
+               </h4>
+               <p className="text-stone-600 leading-relaxed">{data.overview}</p>
+            </div>
+
+            <div>
+               <h4 className="flex items-center gap-2 font-bold text-stone-800 text-sm uppercase tracking-wide mb-3">
+                 <Cpu size={16} className="text-stone-400" /> Key Contributions
+               </h4>
+               <ul className="space-y-3">
+                 {data.contributions.map((item, i) => (
+                   <li key={i} className="flex gap-3 text-stone-600 text-sm leading-relaxed">
+                     <CheckCircle size={16} className="text-green-700 shrink-0 mt-0.5" />
+                     <span>{item}</span>
+                   </li>
+                 ))}
+               </ul>
+            </div>
+
+            {data.results && (
+              <div className="bg-stone-50 p-6 rounded-lg border border-stone-100">
+                 <h4 className="flex items-center gap-2 font-bold text-stone-800 text-sm uppercase tracking-wide mb-3">
+                   <Award size={16} className="text-stone-400" /> Results & Impact
+                 </h4>
+                 <p className="text-stone-600 text-sm leading-relaxed">{data.results}</p>
+              </div>
+            )}
+            
+            {/* Tags in Modal */}
+            <div className="flex flex-wrap gap-2 pt-4">
+              {data.tags && data.tags.map(tag => (
+                <span key={tag} className="text-xs font-bold uppercase text-stone-500 bg-stone-100 border border-stone-200 px-3 py-1 rounded-full">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ModernProjectRow = ({ title, category, overview, contributions, results, tags, color, image, index }) => {
+  const [modalOpen, setModalOpen] = useState(false);
   const isEven = index % 2 === 0;
-  
+
+  // Define updated image links
+  const updatedImages = {
+    "Formula SAE EV Wheel Centre": "https://github.com/danielbae1/portfolio-website-images/blob/main/WC%20wide.png?raw=true",
+    "2-Spool Turbofan Engine": "https://github.com/danielbae1/portfolio-website-images/blob/main/b787_8_215_genx_cutaway.jpg?raw=true",
+    "Custom Composites 3D Printer": "https://github.com/danielbae1/portfolio-website-images/blob/main/3D%20wide%202.JPG?raw=true",
+    "6-Axis Camera Robot Arm": "https://github.com/danielbae1/portfolio-website-images/blob/main/CA%20wide.png?raw=true",
+    "Lab-Grade Silica Powder Dispenser": "https://github.com/danielbae1/portfolio-website-images/blob/main/silica.png?raw=true", 
+    "Ford Wind Tunnel CFD Validation": "https://github.com/danielbae1/portfolio-website-images/blob/main/wt%20wide.JPG?raw=true"
+  };
+
+  const projectData = { title, category, overview, contributions, results, tags };
+
   return (
     <FadeIn className="mb-32 last:mb-0">
-      <div className={`flex flex-col lg:flex-row gap-12 lg:gap-20 items-center ${isEven ? '' : 'lg:flex-row-reverse'}`}>
+      <div className={`flex flex-col lg:flex-row gap-12 lg:gap-20 items-start ${isEven ? '' : 'lg:flex-row-reverse'}`}>
+        
+        {/* Image Side - Full Aspect Ratio */}
         <div className="w-full lg:w-1/2">
-           <div className="relative group">
+           <div className="relative group cursor-pointer" onClick={() => setModalOpen(true)}>
               <div className={`absolute -inset-4 ${color} opacity-20 rounded-xl transform rotate-2 group-hover:rotate-0 transition-transform duration-500`}></div>
-              <div className="relative h-96 w-full overflow-hidden rounded-lg shadow-2xl">
-                 <div className={`absolute inset-0 ${color} opacity-10 mix-blend-multiply z-10`}></div>
-                 {image ? (
-                    <img src={image} alt={title} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" />
+              {/* Image Container */}
+              <div className="relative w-full rounded-lg shadow-2xl bg-white overflow-hidden">
+                 {image || updatedImages[title] ? (
+                    <img 
+                      src={updatedImages[title] || image} 
+                      alt={title} 
+                      className="w-full h-auto object-contain transform group-hover:scale-105 transition-transform duration-700" 
+                    />
                  ) : (
-                    <div className="w-full h-full bg-stone-200 flex items-center justify-center text-stone-400 font-mono">Image Placeholder</div>
+                    <div className="w-full h-64 bg-stone-200 flex items-center justify-center text-stone-400 font-mono">Image Placeholder</div>
                  )}
-                 <div className="absolute bottom-0 left-0 right-0 bg-stone-900/90 backdrop-blur-md p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-20">
-                    <div className="flex flex-wrap gap-2">
-                      {tags.map(tag => (
-                        <span key={tag} className="text-[10px] font-bold uppercase text-stone-300 border border-stone-600 px-2 py-1">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
+                 
+                 <div className="absolute bottom-0 left-0 right-0 bg-stone-900/90 backdrop-blur-md p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-20 flex justify-between items-center">
+                    <span className="text-white text-xs font-bold uppercase tracking-widest">Click to View Analysis</span>
+                    <ArrowDown className="-rotate-90 text-white" size={16} />
                  </div>
               </div>
            </div>
         </div>
-        <div className="w-full lg:w-1/2">
+
+        {/* Content Side */}
+        <div className="w-full lg:w-1/2 pt-4">
            <span className="font-mono text-xs font-bold uppercase tracking-widest text-green-900 mb-2 block">{category}</span>
-           <h2 className="font-serif text-4xl text-stone-900 mb-6 leading-tight">{title}</h2>
-           <div className="space-y-8">
-             <div>
-               <h4 className="flex items-center gap-2 font-bold text-stone-800 text-sm uppercase tracking-wide mb-2 border-b border-stone-200 pb-1">
-                 <Settings size={14} className="text-stone-400" /> Overview
-               </h4>
-               <p className="text-stone-600 text-sm leading-relaxed">{overview}</p>
+           <h2 className="font-serif text-4xl text-stone-900 mb-2 leading-tight">{title}</h2>
+           
+           {/* Early Stage Badge for Turbofan */}
+           {title.includes("Turbofan") && (
+              <div className="inline-flex items-center gap-2 bg-amber-50 text-amber-700 px-3 py-1 rounded-sm border border-amber-200 mb-6">
+                <AlertTriangle size={14} />
+                <span className="text-xs font-bold uppercase tracking-wide">Early Stage • Updates Coming Soon</span>
+              </div>
+           )}
+
+           <div className="space-y-6 mt-4">
+             <p className="text-stone-600 text-sm leading-relaxed line-clamp-4">{overview}</p>
+             
+             <div className="flex flex-wrap gap-2">
+                {tags.slice(0, 3).map(tag => (
+                  <span key={tag} className="text-[10px] font-bold uppercase text-stone-400 border border-stone-200 px-2 py-1">
+                    {tag}
+                  </span>
+                ))}
              </div>
-             <div>
-               <h4 className="flex items-center gap-2 font-bold text-stone-800 text-sm uppercase tracking-wide mb-2 border-b border-stone-200 pb-1">
-                 <Cpu size={14} className="text-stone-400" /> My Contributions
-               </h4>
-               <ul className="space-y-2">
-                 {contributions.map((item, i) => (
-                   <li key={i} className="text-stone-600 text-sm leading-relaxed pl-3 border-l-2 border-stone-200">
-                     {item}
-                   </li>
-                 ))}
-               </ul>
-             </div>
-             {results && (
-               <div>
-                 <h4 className="flex items-center gap-2 font-bold text-stone-800 text-sm uppercase tracking-wide mb-2 border-b border-stone-200 pb-1">
-                   <Award size={14} className="text-stone-400" /> Results
-                 </h4>
-                 <p className="text-stone-600 text-sm leading-relaxed">{results}</p>
-               </div>
-             )}
+
+             <button
+               onClick={() => setModalOpen(true)}
+               className="inline-flex items-center gap-2 bg-stone-900 text-white px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-stone-700 transition-colors"
+             >
+               Click for Details
+             </button>
            </div>
         </div>
       </div>
+      
+      <ProjectModal isOpen={modalOpen} onClose={() => setModalOpen(false)} data={projectData} />
     </FadeIn>
   );
 };
@@ -252,12 +339,13 @@ const SkillCategory = ({ title, skills }) => (
   </div>
 );
 
+// --- SUMMARY MODAL WITH RESUME AND PDF BUTTONS (Restored Content) ---
 const SummaryModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-stone-900/60 backdrop-blur-sm" onClick={onClose}></div>
-      <div className="relative bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in fade-in zoom-in duration-300">
+      <div className="absolute inset-0 bg-stone-900/60 backdrop-blur-md" onClick={onClose}></div>
+      <div className="relative bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in fade-in zoom-in duration-300 rounded-sm">
         <button onClick={onClose} className="absolute top-4 right-4 p-2 hover:bg-stone-100 rounded-full transition-colors">
           <X size={20} className="text-stone-500" />
         </button>
@@ -269,13 +357,9 @@ const SummaryModal = ({ isOpen, onClose }) => {
           <p className="text-stone-500 font-medium mb-8">Mechanical Engineering Student (UofT)</p>
           <div className="space-y-8">
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-stone-50 p-4 border border-stone-100">
-                <span className="block font-bold text-2xl text-stone-900">4th</span>
+              <div className="bg-stone-50 p-4 border border-stone-100 col-span-2">
+                <span className="block font-bold text-2xl text-stone-900">2nd</span>
                 <span className="text-xs text-stone-500 uppercase tracking-wide">Year Engineering</span>
-              </div>
-              <div className="bg-stone-50 p-4 border border-stone-100">
-                <span className="block font-bold text-2xl text-stone-900">14</span>
-                <span className="text-xs text-stone-500 uppercase tracking-wide">Countries Trekked</span>
               </div>
             </div>
             <div>
@@ -283,11 +367,11 @@ const SummaryModal = ({ isOpen, onClose }) => {
                 <Zap size={16} className="text-amber-500" /> Key Competencies
               </h3>
               <p className="text-sm text-stone-600 leading-relaxed mb-3">
-                Specializing in Mechatronics and Solid Mechanics. I bridge the gap between heavy mechanical design (CAD, FEA) and computational logic (Python, C++).
+                Specializing in Mechatronics and Solid Mechanics. I bridge the gap between heavy mechanical design (CAD, FEA) and effective engineering leadership.
               </p>
               <div className="flex flex-wrap gap-2">
                 {['SolidWorks', 'ANSYS', 'Python', 'Arduino', 'Manufacturing'].map(s => (
-                  <span key={s} className="px-2 py-1 bg-stone-100 text-stone-600 text-xs font-bold uppercase">{s}</span>
+                  <span key={s} className="px-2 py-1 bg-stone-100 text-stone-600 text-xs font-bold uppercase border border-stone-200">{s}</span>
                 ))}
               </div>
             </div>
@@ -304,19 +388,36 @@ const SummaryModal = ({ isOpen, onClose }) => {
                   <CheckCircle size={16} className="text-stone-400 shrink-0 mt-0.5" />
                   <span><strong>R&D & Mechatronics:</strong> Led the design and assembly of a custom fiber-reinforced 3D-printing system, achieving an 85% cost reduction.</span>
                 </li>
+                <li className="flex gap-3 text-sm text-stone-600">
+                  <CheckCircle size={16} className="text-stone-400 shrink-0 mt-0.5" />
+                  <span><strong>FSAE Wheel Centre Development:</strong> Designed and FEA-validated wheel centres for UTFR’s first in-hub motor race car, achieving an 11% mass reduction and 8% stiffness increase.</span>
+                </li>
+                <li className="flex gap-3 text-sm text-stone-600">
+                  <CheckCircle size={16} className="text-stone-400 shrink-0 mt-0.5" />
+                  <span><strong>Turbofan Engine Design:</strong> Designing and validating a high-bypass, 2-spool turbofan engine, gaining foundational turbomachinery knowledge applicable to aerospace roles.</span>
+                </li>
               </ul>
             </div>
             <div className="pt-6 border-t border-stone-100 mt-8">
                <p className="text-sm font-medium text-stone-900 mb-4">
-                 Currently seeking PEY Co-op opportunities for <span className="underline decoration-green-500 decoration-2">Fall 2025</span>.
+                 Currently seeking PEY Co-op opportunities for <span className="underline decoration-green-500 decoration-2">May 2026</span>.
                </p>
-               <div className="flex gap-4">
-                 <button onClick={onClose} className="bg-stone-900 text-white px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-stone-700 transition-colors w-full md:w-auto text-center">
-                   View Full Portfolio
-                 </button>
-                 <a href="mailto:danny.bae@mail.utoronto.ca" className="border border-stone-200 text-stone-900 px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-stone-50 transition-colors w-full md:w-auto text-center">
-                   Contact Me
+               {/* Updated Buttons in Modal */}
+               <div className="flex flex-wrap gap-4">
+                 <a 
+                   href="https://cdn.jsdelivr.net/gh/danielbae1/Resume-and-Portfolio-PDF@main/Daniel_Bae_Resume_2026-01-08.pdf" 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   className="flex items-center gap-2 bg-stone-900 text-white px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-stone-700 transition-colors w-full md:w-auto text-center"
+                 >
+                   <Download size={16} /> Resume
                  </a>
+                 <button 
+                   disabled 
+                   className="flex items-center gap-2 border border-stone-200 text-stone-400 px-6 py-3 text-xs font-bold uppercase tracking-widest cursor-not-allowed w-full md:w-auto text-center"
+                 >
+                   <FileText size={16} /> Portfolio PDF
+                 </button>
                </div>
             </div>
           </div>
@@ -410,7 +511,7 @@ export default function PortfolioV3() {
     }, 100);
   };
 
-  // Nav text color - White when at top (scrolled=false) REGARDLESS of page, Dark when scrolled
+  // Ensure nav text is white when not scrolled (since all headers have dark images)
   const navTextColor = !scrolled 
     ? 'text-white drop-shadow-md hover:text-stone-200' 
     : 'text-stone-500 hover:text-stone-900';
@@ -464,9 +565,7 @@ export default function PortfolioV3() {
           {/* --- HERO SECTION --- */}
           <header className="relative h-screen flex items-center justify-center overflow-hidden">
             <div className="absolute inset-0 bg-stone-900">
-               {/* Gradients */}
                <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/60 z-10"></div>
-               {/* Parallax Image Layer */}
                <div 
                  className="absolute w-full h-[120vh] -top-[10vh] left-0 bg-cover bg-center opacity-80" 
                  style={{ 
@@ -504,7 +603,7 @@ export default function PortfolioV3() {
                  </span>
                  <span className="hidden md:block w-px h-4 bg-white/40"></span>
                  <span className="flex items-center gap-2 text-sm font-medium tracking-wide">
-                   <Phone size={16} /> 226-921-5604
+                   <Phone size={16} /> 1-226-921-5604
                  </span>
               </div>
             </div>
@@ -520,10 +619,12 @@ export default function PortfolioV3() {
               
               <div className="hidden md:flex items-center gap-6 opacity-60 grayscale hover:grayscale-0 transition-all duration-300">
                 <div className="flex items-center gap-2 font-serif font-bold text-stone-700">
-                   <span className="text-2xl">UofT</span>
+                   {/* ADDED LOGO 1: UofT */}
+                   <img src="https://github.com/danielbae1/portfolio-website-images/blob/main/uoft%20logo.png?raw=true" alt="UofT" className="h-10 w-auto opacity-80" />
                 </div>
-                <div className="h-4 w-px bg-stone-400"></div>
-                <div className="font-bold text-stone-600 tracking-tight">UTFR</div>
+                <div className="h-6 w-px bg-stone-400/50"></div>
+                {/* ADDED LOGO 2: UTFR */}
+                <img src="https://github.com/danielbae1/portfolio-website-images/blob/main/utfr%20logo.png?raw=true" alt="UTFR" className="h-8 w-auto opacity-80" />
               </div>
 
               <div className="flex-1 md:flex-none flex justify-center">
@@ -538,7 +639,7 @@ export default function PortfolioV3() {
 
                <div className="hidden md:flex items-center gap-6 opacity-60 grayscale hover:grayscale-0 transition-all duration-300 justify-end">
                 <div className="font-mono text-xs font-bold text-stone-600 uppercase">
-                  Available <br/> Fall 2025
+                  Available <br/> May 2026
                 </div>
                 <a href="https://www.linkedin.com/in/danielbae1/" target="_blank" rel="noreferrer" className="h-8 w-8 bg-white rounded-full flex items-center justify-center hover:bg-blue-100 transition-colors shadow-sm">
                    <Linkedin size={16} className="text-stone-700" />
@@ -551,7 +652,7 @@ export default function PortfolioV3() {
           <section id="about" className="relative bg-stone-900 text-white overflow-hidden">
              {/* Background Image */}
              <div className="absolute inset-0 z-0">
-                <div className="absolute inset-0 bg-stone-900/80 z-10"></div> {/* Dark Overlay */}
+                <div className="absolute inset-0 bg-stone-900/80 z-10"></div>
                 <img 
                   src="https://github.com/danielbae1/portfolio-website-images/blob/main/DSC02135.JPG?raw=true" 
                   alt="Mountain Background" 
@@ -561,35 +662,31 @@ export default function PortfolioV3() {
 
              <div className="max-w-6xl mx-auto px-6 md:px-12 py-32 relative z-10">
                <div className="grid md:grid-cols-2 gap-16 items-center">
-                 {/* Text Content - Fade In */}
                  <FadeIn>
                     <h2 className="font-serif text-5xl md:text-6xl text-white mb-8 leading-tight drop-shadow-lg">
                       Engineering with <br/> an explorer's mindset.
                     </h2>
+                    
                     <div className="space-y-6 text-stone-200 leading-relaxed text-sm md:text-base font-sans font-medium tracking-wide drop-shadow-md">
                        <p>
-                        Hello! My name is <strong>Danny</strong> and I am a <strong>Mechanical Engineering student</strong> raised in rural Stratford, ON, at the <strong>University of Toronto</strong> with specialization in <strong>Mechatronics and Solid Mechanics</strong>. My life has changed drastically within the past three years and here's my story.
+                        Hello! My name is <strong>Danny</strong> and I am a <strong>Mechanical Engineering student</strong> raised in rural Stratford, ON, at the <strong>University of Toronto</strong> with specialization in <strong>Mechatronics and Solid Mechanics</strong>. My life has changed drastically within the past three years and here’s my story.
                        </p>
-                       
                        <p>
-                         Initially pursuing medicine after high school in 2020 and studying at one of Canada's most competitive pre-med programs for two and a half years, I dropped out. After taking some time away to work full time, reflect, and <strong>solo-backpack South America</strong>, I decided to begin my mechanical engineering career at the University of Toronto.
+                         Initially pursuing medicine after high school in 2020 and studying at one of Canada’s most competitive pre-med programs for two and a half years, I dropped out. After taking some time away to work full time, reflect, and <strong>solo-backpack South America</strong>, I decided to begin my mechanical engineering career at the University of Toronto.
                        </p>
-  
                        <p>
                          I not only reignited my curiosity and passion for mechanical engineering, but I supercharged my drive to pursue three industries: <strong>aerospace, performance automotive, and consumer tech</strong>. From designing jet propulsion systems to the newest and flashy tech, the passion is there. But do I have the skills to back it up?
                        </p>
-  
                        <p>
-                         Throughout my time here at U of T, I've gained invaluable technical experience working with <strong>UTFR (University of Toronto Formula Racing)</strong>, a composites research lab, and on my own engineering endeavors at home. My most notable contribution to our FSAE team has been designing wheel centers for our first ever in-hub motor race car, considering novel, unfamiliar load cases the team has never previously dealt with. Outside of school, my largest and most ambitious project has been designing, validating, and 3D printing a high-bypass, 2-spool turbofan engine.
+                         Throughout my time here at U of T, I’ve gained invaluable technical experience working with <strong>UTFR (University of Toronto Formula Racing)</strong>, a composites research lab, and on my own engineering endeavors at home. My most notable contribution to our FSAE team has been designing wheel centers for our first ever in-hub motor race car, considering novel, unfamiliar load cases the team has never previously dealt with. Outside of school, my largest and most ambitious project has been designing, validating, and 3D printing a high-bypass, 2-spool turbofan engine.
                        </p>
-  
                        <p>
-                         These experiences—from the resilience learned during my career pivot to the technical knowledge required for FSAE design and propulsion analysis—have prepared me to take the next step and apply my skills in more fast-paced industrial environments. I'm currently seeking <strong>Summer Co-op opportunities for May 2025</strong>.
+                         These experiences—from the resilience learned during my career pivot to the technical knowledge required for FSAE design and propulsion analysis—have prepared me to take the next step and apply my skills in more fast-paced industrial environments. I'm currently seeking <strong>Summer Co-op opportunities for May 2026</strong>.
                        </p>
                     </div>
                     
                     <div className="flex flex-wrap gap-4 mt-12">
-                      <a href="#" className="flex items-center gap-2 bg-white text-stone-900 px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-stone-200 transition-colors shadow-lg">
+                      <a href="https://cdn.jsdelivr.net/gh/danielbae1/Resume-and-Portfolio-PDF@main/Daniel_Bae_Resume_2026-01-08.pdf" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-white text-stone-900 px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-stone-200 transition-colors shadow-lg">
                         <Download size={16} /> Resume
                       </a>
                       <a href="#" className="flex items-center gap-2 border-2 border-white text-white px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-white/10 transition-colors">
@@ -598,9 +695,7 @@ export default function PortfolioV3() {
                     </div>
                  </FadeIn>
                  
-                 {/* Profile Images Column */}
                  <FadeIn delay={200} className="hidden md:flex md:flex-col gap-6">
-                    {/* Main Profile Image */}
                    <div className="relative aspect-[4/5] w-full overflow-hidden border-8 border-white/10 shadow-2xl rounded-lg">
                      <img 
                        src="https://github.com/danielbae1/portfolio-website-images/blob/main/_DSC7038_Original.JPG?raw=true" 
@@ -609,7 +704,6 @@ export default function PortfolioV3() {
                      />
                    </div>
                    
-                   {/* Secondary Image */}
                    <div className="relative aspect-square w-2/3 self-end overflow-hidden border-8 border-white/10 shadow-2xl rounded-lg -mt-12 z-10">
                      <img 
                        src="https://github.com/danielbae1/portfolio-website-images/blob/main/IMG_7569%20Copy%20Copy.JPG?raw=true" 
@@ -778,7 +872,7 @@ export default function PortfolioV3() {
 
       {/* ==================== PROJECTS VIEW ==================== */}
       {currentView === 'projects' && (
-        <div className="min-h-screen bg-stone-50"> {/* LIGHT BACKGROUND */}
+        <div className="min-h-screen bg-stone-50"> 
            {/* Header */}
            <div className="relative h-[60vh] w-full flex items-center justify-center overflow-hidden">
               <div className="absolute inset-0 bg-stone-900">
@@ -801,25 +895,9 @@ export default function PortfolioV3() {
              {/* MODERN PROJECT ROWS - Updated with PDF Content */}
              <ModernProjectRow 
                index={0}
-               title="2-Spool Turbofan Engine"
-               category="Propulsion / Additive Mfg"
-               image="https://github.com/danielbae1/portfolio-website-images/blob/main/image_980c5a.png?raw=true" 
-               color="bg-stone-900"
-               overview="A personal project to model and 3D-print a functioning (electric motor-powered) 2-spool turbofan engine to learn turbomachinery fundamentals."
-               contributions={[
-                 "Started detailed CAD for fan, LPC, HPC, combustor, and turbine stages.",
-                 "Developing simplified shafting/bearing layouts for independent N1/N2 speeds.",
-                 "Researching clearances and blade stagger angles to inform geometry."
-               ]}
-               results="Early CAD models complete for major static and rotating elements. Building foundational turbomachinery knowledge applicable to aerospace roles."
-               tags={["Turbomachinery", "CAD", "Additive Mfg"]}
-             />
-
-             <ModernProjectRow 
-               index={1}
                title="Formula SAE EV Wheel Centre"
                category="Automotive / Design"
-               image="https://github.com/danielbae1/portfolio-website-images/blob/main/image_f80de6.jpg?raw=true" 
+               image="https://github.com/danielbae1/portfolio-website-images/blob/main/WC%20wide.png?raw=true" 
                color="bg-stone-900"
                overview="New wheel centres were required for this year's UTFR car as the team transitioned to in-hub electric motors. This component serves as the critical interface between the hub assembly (motors, gearbox) and the carbon fibre wheel rim."
                contributions={[
@@ -828,14 +906,32 @@ export default function PortfolioV3() {
                  "Communicated with primary hub designer to ensure perfect interference fit during parallel design phases."
                ]}
                results="Reduced mass by 16% compared to baseline geometry. Delivered an FEA-validated part capable of handling all acceleration, braking, and cornering loads."
-               tags={["SolidWorks", "ANSYS", "FEA", "DFM"]}
+               tags={['SolidWorks', 'ANSYS', 'FEA', 'DFM']}
+             />
+
+             <ModernProjectRow 
+               index={1}
+               title="2-Spool Turbofan Engine"
+               category="Propulsion / Additive Mfg"
+               image="https://github.com/danielbae1/portfolio-website-images/blob/main/b787_8_215_genx_cutaway.jpg?raw=true" 
+               color="bg-stone-900"
+               overview="A personal project to model and 3D-print a functioning (electric motor-powered) 2-spool turbofan engine to learn turbomachinery fundamentals."
+               contributions={[
+                 "Designing and FEA-validating a 3D printed turbofan architecture in Solidworks, targeting a 10:1 bypass ratio.",
+                 "Calculating velocity triangles for compressor and turbine stages to optimize blade stagger angles and mass flow rates, to achieve a projected engine pressure ratio of 15.",
+                 "Designing LP/HP architecture and a 4:1 planetary fan reduction gearbox to demonstrate speed decoupling.",
+                 "Planning structural FEA (ANSYS) of rotating components and housings for stiffness and stress validation.",
+                 "Optimized for DFM, assembly, and visualization, rather than CFD-validated aerodynamic performance."
+               ]}
+               results="Early CAD models in the works for major static and rotating elements. Building foundational turbomachinery knowledge applicable to future aerospace roles."
+               tags={['Turbomachinery', 'CAD', 'Additive Mfg']}
              />
 
              <ModernProjectRow 
                index={2}
                title="Custom Composites 3D Printer"
                category="Mechatronics / R&D"
-               image="https://github.com/danielbae1/portfolio-website-images/blob/main/image_98183b.png?raw=true" 
+               image="https://github.com/danielbae1/portfolio-website-images/blob/main/3D%20wide%202.JPG?raw=true" 
                color="bg-stone-800"
                overview="Took over the build and design of a custom 3D printer capable of fibre-reinforced polymer extrusion for a research lab. The goal was to create a flexible platform for testing various polymer pellets."
                contributions={[
@@ -843,32 +939,49 @@ export default function PortfolioV3() {
                  "Selected and assembled motors and 3-axis movement mechanisms.",
                  "Configured Klipper firmware with no prior experience in firmware programming."
                ]}
-               results="Delivered an almost-functioning one-of-a-kind 3D printer with moving motors and axes, achieving an 85%+ cost reduction compared to commercial alternatives."
-               tags={["Mechatronics", "Klipper", "G-Code", "Hardware Assembly"]}
+               results="Delivered an almost-functioning one-of-a-kind 3D printer with moving motors and axes."
+               tags={['Mechatronics', 'Klipper', 'G-Code', 'Hardware Assembly']}
              />
 
              <ModernProjectRow 
                index={3}
-               title="Cinematography Robot Arm"
+               title="6-Axis Camera Robot Arm" // Updated Title
                category="Robotics / Consumer Tech"
-               image="https://github.com/danielbae1/portfolio-website-images/blob/main/image_982399.jpg?raw=true" 
+               image="https://github.com/danielbae1/portfolio-website-images/blob/main/CA%20wide.png?raw=true" 
                color="bg-stone-900"
-               overview="Designed a camera robot aimed at amateur outdoor videographers. The goal was to enable slow, sweeping cinematic shots with a portable system weighing just over 22 kg."
+               overview="Designed a 6-axis camera robot aimed at amateur outdoor videographers. The goal was to enable slow, sweeping cinematic shots with a portable system weighing just over 2 kg." // Updated description
                contributions={[
-                 "Researched and developed motor and gearbox assembly optimized for minimal noise and backlash.",
-                 "Developed a custom tripod with height adjustability and a spreader for stability.",
-                 "Held frequent design reviews to validate manufacturability."
+                 "Developed a full CAD assembly in Solidworks, targeting <1 mm deflection at full reach.", // Updated contribution
+                 "Performed torque and gear calculations to size motors and gear trains for fluid motion with payloads up to 2 kg.", // Updated contribution
+                 "Led a 4-member team in designing the portable system." // Added leadership detail
                ]}
                results="Developed all mechanical components including hardware and fasteners. Created an aesthetically beautiful, portable system for automated cinematic shots."
-               tags={["SolidWorks", "Motor Control", "Mechanism Design"]}
+               tags={['SolidWorks', 'Motor Control', 'Mechanism Design']}
+             />
+             
+             {/* NEW PROJECT: Silica Powder Dispenser */}
+             <ModernProjectRow 
+               index={4}
+               title="Lab-Grade Silica Powder Dispenser"
+               category="Automation / Product Design"
+               image="https://github.com/danielbae1/portfolio-website-images/blob/main/silica.png?raw=true"
+               color="bg-stone-800"
+               overview="Led a 6-member team in designing a lab-grade silica gel powder dispenser with an active HEPA filtration system."
+               contributions={[
+                 "Managed team progress and generated weekly status reports using Microsoft Project Gantt Chart.",
+                 "Designed the active HEPA filtration system to ensure safe operation in a lab environment.",
+                 "Coordinated the integration of mechanical dispensing mechanisms with electronic controls."
+               ]}
+               results="Successfully designed a functional prototype meeting lab safety standards and dispensing accuracy requirements."
+               tags={['Product Design', 'Project Management', 'SolidWorks']}
              />
 
               <ModernProjectRow 
-               index={4}
+               index={5} // Incremented index
                title="Ford Wind Tunnel CFD Validation"
                category="Aerodynamics / Testing"
                image="https://github.com/danielbae1/portfolio-website-images/blob/main/image_98143b.png?raw=true" 
-               color="bg-stone-800"
+               color="bg-stone-900" // Alternating color
                overview="Visited the Ford Performance wind tunnel in Detroit to validate CFD simulation results against real-world data for the UTFR racecar."
                contributions={[
                  "Compared CFD simulation results with real-life wind tunnel data.",
@@ -876,7 +989,7 @@ export default function PortfolioV3() {
                  "Coordinated team tasks and logistics throughout the testing sessions."
                ]}
                results="Drastically reduced flap configuration change times. Increased the number of configurations tested by 50% compared to the previous year."
-               tags={["CFD", "Aerodynamics", "Data Analysis"]}
+               tags={['CFD', 'Aerodynamics', 'Data Analysis']}
              />
            </div>
         </div>
@@ -984,4 +1097,3 @@ export default function PortfolioV3() {
     </div>
   );
 }
-
